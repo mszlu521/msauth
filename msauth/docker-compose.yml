@@ -1,0 +1,22 @@
+version: '3'
+services:
+  mysql:
+    container_name: auth-mysql
+    image: mysql:${MYSQL_VERSION}
+    restart: always
+    ports:
+      - 3309:3306
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: msauth
+    volumes:
+      - ${MYSQL_DIR}/data:/var/lib/mysql
+      - ${MYSQL_DIR}/conf:/etc/mysql/conf.d/
+      - ${MYSQL_DIR}/logs:/logs
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
