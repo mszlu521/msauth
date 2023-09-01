@@ -22,8 +22,8 @@ export function getUserPage(
 ): AxiosPromise<PageResult<UserPageVO[]>> {
   return request({
     url: "/api/v1/users/page",
-    method: "get",
-    params: queryParams,
+    method: "post",
+    data: queryParams,
   });
 }
 
@@ -34,8 +34,8 @@ export function getUserPage(
  */
 export function getUserForm(userId: number): AxiosPromise<UserForm> {
   return request({
-    url: "/api/v1/users/" + userId + "/form",
-    method: "get",
+    url: "/api/v1/users/" + userId,
+    method: "post",
   });
 }
 
@@ -46,7 +46,7 @@ export function getUserForm(userId: number): AxiosPromise<UserForm> {
  */
 export function addUser(data: any) {
   return request({
-    url: "/api/v1/users",
+    url: "/api/v1/users/add",
     method: "post",
     data: data,
   });
@@ -60,8 +60,8 @@ export function addUser(data: any) {
  */
 export function updateUser(id: number, data: UserForm) {
   return request({
-    url: "/api/v1/users/" + id,
-    method: "put",
+    url: "/api/v1/users/" + id + "/update",
+    method: "post",
     data: data,
   });
 }

@@ -3,8 +3,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <modules>
-        <module>msauth-common</module>
         <module>mszuth-admin</module>
+        <module>msauth-common</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -12,24 +12,23 @@
         <version>3.1.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.mszlu.auth</groupId>
-    <artifactId>mszlu-auth</artifactId>
+    <groupId>com.mszlu.mszuth</groupId>
+    <artifactId>msauth</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>mszlu-auth</name>
-    <description>mszlu-auth</description>
-
-    <packaging>pom</packaging>
-
+    <name>msauth</name>
+    <description>msauth-parent</description>
     <properties>
         <java.version>17</java.version>
         <jwt.version>3.4.0</jwt.version>
         <swagger.version>3.0.0</swagger.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+        <hutool.version>5.8.20</hutool.version>
     </properties>
+    <packaging>pom</packaging>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.mszlu.auth</groupId>
+                <groupId>com.mszlu.mszuth</groupId>
                 <artifactId>msauth-common</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
@@ -55,9 +54,27 @@
                 <version>${org.mapstruct.version}</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>3.5.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-bom</artifactId>
+                <version>${hutool.version}</version>
+                <type>pom</type>
+                <!-- 注意这里是import -->
+                <scope>import</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>4.4</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>io.springfox</groupId>
@@ -65,22 +82,4 @@
             <version>${swagger.version}</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>

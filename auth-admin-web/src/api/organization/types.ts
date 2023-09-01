@@ -45,3 +45,15 @@ export interface OrganizationDTO {
   keywords?: string;
   status?: number;
 }
+
+export interface OrganizationForm {
+  id?: number;
+  /**
+   * 组织名称
+   */
+  name?: string;
+  code?: string;
+  sort?: number;
+  parentId?: number;
+  status?: number;
+}

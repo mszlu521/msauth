@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { getDictOptions } from "@/api/dict";
+// import { getDictOptions } from "@/api/dict";
 
 const props = defineProps({
   /**
@@ -54,8 +54,20 @@ function handleChange(val?: string) {
 
 onBeforeMount(() => {
   // 根据字典类型编码(typeCode)获取字典选项
-  getDictOptions(props.typeCode).then((response) => {
-    options.value = response.data;
-  });
+  // getDictOptions(props.typeCode).then((response) => {
+  //   options.value = response.data;
+  // });
+  if (props.typeCode == "gender") {
+    options.value = [
+      {
+        value: "0",
+        label: "男",
+      },
+      {
+        value: "1",
+        label: "女",
+      },
+    ];
+  }
 });
 </script>

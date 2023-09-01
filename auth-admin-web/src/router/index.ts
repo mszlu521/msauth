@@ -80,7 +80,64 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-
+  {
+    path: "/user",
+    component: Layout,
+    redirect: "/user",
+    children: [
+      {
+        path: "user",
+        component: () => import("@/views/system/user/index.vue"),
+        name: "User", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
+        // https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
+        meta: {
+          title: "用户管理",
+          icon: "user",
+          affix: true,
+          keepAlive: true,
+        },
+      },
+      {
+        path: "401",
+        component: () => import("@/views/error-page/401.vue"),
+        meta: { hidden: true },
+      },
+      {
+        path: "404",
+        component: () => import("@/views/error-page/404.vue"),
+        meta: { hidden: true },
+      },
+    ],
+  },
+  {
+    path: "/app",
+    component: Layout,
+    redirect: "/app",
+    children: [
+      {
+        path: "app",
+        component: () => import("@/views/system/app/index.vue"),
+        name: "App", // 用于 keep-alive, 必须与SFC自动推导或者显示声明的组件name一致
+        // https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
+        meta: {
+          title: "应用管理",
+          icon: "goods",
+          affix: true,
+          keepAlive: true,
+        },
+      },
+      {
+        path: "401",
+        component: () => import("@/views/error-page/401.vue"),
+        meta: { hidden: true },
+      },
+      {
+        path: "404",
+        component: () => import("@/views/error-page/404.vue"),
+        meta: { hidden: true },
+      },
+    ],
+  },
   // 外部链接
   // {
   //   path: "/external-link",

@@ -15,7 +15,7 @@ import {
   exportUser,
   importUser,
 } from "@/api/user";
-import { listDeptOptions } from "@/api/dept";
+import { listOrgOptions } from "@/api/organization";
 import { listRoleOptions } from "@/api/role";
 
 import { UserForm, UserQuery, UserPageVO } from "@/api/user/types";
@@ -25,7 +25,7 @@ defineOptions({
   inheritAttrs: false,
 });
 
-const deptTreeRef = ref(ElTree); // 部门树
+const orgTreeRef = ref(ElTree); // 组织树
 const queryFormRef = ref(ElForm); // 查询表单
 const userFormRef = ref(ElForm); // 用户表单
 
@@ -47,10 +47,10 @@ const formData = reactive<UserForm>({
 });
 
 const rules = reactive({
-  username: [{ required: true, message: "用户名不能为空", trigger: "blur" }],
-  nickname: [{ required: true, message: "用户昵称不能为空", trigger: "blur" }],
-  deptId: [{ required: true, message: "所属部门不能为空", trigger: "blur" }],
-  roleIds: [{ required: true, message: "用户角色不能为空", trigger: "blur" }],
+  name: [{ required: true, message: "用户名不能为空", trigger: "blur" }],
+  // nickname: [{ required: true, message: "昵称不能为空", trigger: "blur" }],
+  orgIds: [{ required: true, message: "所属组织不能为空", trigger: "blur" }],
+  // roleIds: [{ required: true, message: "用户角色不能为空", trigger: "blur" }],
   email: [
     {
       pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/,
@@ -67,8 +67,8 @@ const rules = reactive({
   ],
 });
 
-const searchDeptName = ref();
-const deptList = ref<OptionType[]>();
+const searchOrgName = ref();
+const orgList = ref<OptionType[]>();
 const roleList = ref<OptionType[]>();
 const importDialog = reactive<DialogOption>({
   title: "用户导入",
@@ -76,15 +76,15 @@ const importDialog = reactive<DialogOption>({
 });
 
 /**
- * 导入选择的部门ID
+ * 导入选择的组织ID
  */
-const importDeptId = ref<number>();
+const importOrgId = ref<number>();
 const excelFile = ref<File>();
 const excelFilelist = ref<File[]>([]);
 
 watchEffect(
   () => {
-    deptTreeRef.value.filter(searchDeptName.value);
+    orgTreeRef.value.filter(searchOrgName.value);
   },
   {
     flush: "post", // watchEffect会在DOM挂载或者更新之前就会触发，此属性控制在DOM元素更新后运行
@@ -92,9 +92,9 @@ watchEffect(
 );
 
 /**
- * 部门筛选
+ * 组织筛选
  */
-function handleDeptFilter(value: string, data: any) {
+function handleOrgFilter(value: string, data: any) {
   if (!value) {
     return true;
   }
@@ -102,10 +102,10 @@ function handleDeptFilter(value: string, data: any) {
 }
 
 /**
- * 部门树节点
+ * 组织树节点
  */
-function handleDeptNodeClick(data: { [key: string]: any }) {
-  queryParams.deptId = data.value;
+function handleOrgNodeClick(data: { [key: string]: any }) {
+  queryParams.orgId = data.value;
   handleQuery();
 }
 
@@ -158,7 +158,7 @@ function handleQuery() {
 function resetQuery() {
   queryFormRef.value.resetFields();
   queryParams.pageNum = 1;
-  queryParams.deptId = undefined;
+  queryParams.orgId = undefined;
   handleQuery();
 }
 
@@ -191,8 +191,8 @@ function resetPassword(row: { [key: string]: any }) {
 
 /** 打开表单弹窗 */
 async function openDialog(userId?: number) {
-  await getDeptOptions();
-  await getRoleOptions();
+  await getOrgOptions();
+  // await getRoleOptions();
   dialog.visible = true;
   if (userId) {
     dialog.title = "修改用户";
@@ -267,11 +267,11 @@ function handleDelete(id?: number) {
 }
 
 /**
- * 获取部门下拉项
+ * 获取组织下拉项
  */
-async function getDeptOptions() {
-  listDeptOptions().then((response) => {
-    deptList.value = response.data;
+async function getOrgOptions() {
+  listOrgOptions().then((response) => {
+    orgList.value = response.data;
   });
 }
 
@@ -296,8 +296,8 @@ function downloadTemplate() {
 
 /** 打开导入弹窗 */
 async function openImportDialog() {
-  await getDeptOptions();
-  importDeptId.value = undefined;
+  await getOrgOptions();
+  importOrgId.value = undefined;
   importDialog.visible = true;
 }
 
@@ -318,12 +318,12 @@ function handleExcelChange(file: UploadFile) {
 
 /** 导入用户提交 */
 function handleUserImport() {
-  if (importDeptId.value) {
+  if (importOrgId.value) {
     if (!excelFile.value) {
       ElMessage.warning("上传Excel文件不能为空");
       return false;
     }
-    importUser(importDeptId.value, excelFile.value).then((response) => {
+    importUser(importOrgId.value, excelFile.value).then((response) => {
       ElMessage.success(response.data);
       closeImportDialog();
       resetQuery();
@@ -356,9 +356,11 @@ function handleUserExport() {
     window.URL.revokeObjectURL(href); // 释放掉blob对象
   });
 }
-
+function formatGender(row: any) {
+  return row.gender === 0 ? "男" : row.gender === 1 ? "女" : "未填写";
+}
 onMounted(() => {
-  getDeptOptions(); // 初始化部门
+  getOrgOptions(); // 初始化组织
   handleQuery(); // 初始化用户列表数据
 });
 </script>
@@ -366,24 +368,24 @@ onMounted(() => {
 <template>
   <div class="app-container">
     <el-row :gutter="20">
-      <!-- 部门树 -->
+      <!-- 组织树 -->
       <el-col :lg="4" :xs="24" class="mb-[12px]">
         <el-card shadow="never">
-          <el-input v-model="searchDeptName" placeholder="部门名称" clearable>
+          <el-input v-model="searchOrgName" placeholder="组织名称" clearable>
             <template #prefix>
               <i-ep-search />
             </template>
           </el-input>
 
           <el-tree
-            ref="deptTreeRef"
+            ref="orgTreeRef"
             class="mt-2"
-            :data="deptList"
+            :data="orgList"
             :props="{ children: 'children', label: 'label', disabled: '' }"
             :expand-on-click-node="false"
-            :filter-node-method="handleDeptFilter"
+            :filter-node-method="handleOrgFilter"
             default-expand-all
-            @node-click="handleDeptNodeClick"
+            @node-click="handleOrgNodeClick"
           />
         </el-card>
       </el-col>
@@ -394,7 +396,7 @@ onMounted(() => {
             <el-form-item label="关键字" prop="keywords">
               <el-input
                 v-model="queryParams.keywords"
-                placeholder="用户名/昵称/手机号"
+                placeholder="名称/手机号"
                 clearable
                 style="width: 200px"
                 @keyup.enter="handleQuery"
@@ -478,30 +480,24 @@ onMounted(() => {
               width="100"
             />
             <el-table-column
-              key="username"
+              key="name"
               label="用户名"
               align="center"
-              prop="username"
+              prop="name"
             />
-            <el-table-column
-              label="用户昵称"
-              width="120"
-              align="center"
-              prop="nickname"
-            />
-
             <el-table-column
               label="性别"
               width="100"
               align="center"
-              prop="genderLabel"
+              prop="gender"
+              :formatter="formatGender"
             />
 
             <el-table-column
-              label="部门"
+              label="组织"
               width="120"
               align="center"
-              prop="deptName"
+              prop="orgNames"
             />
             <el-table-column
               label="手机号码"
@@ -581,23 +577,23 @@ onMounted(() => {
         :rules="rules"
         label-width="80px"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="用户名" prop="name">
+          <el-input v-model="formData.name" placeholder="请输入用户名" />
+        </el-form-item>
+        <!-- <el-form-item label="昵称" prop="nickname">
           <el-input
-            v-model="formData.username"
+            v-model="formData.nickname"
             :readonly="!!formData.id"
-            placeholder="请输入用户名"
+            placeholder="请输入昵称"
           />
-        </el-form-item>
+        </el-form-item> -->
 
-        <el-form-item label="用户昵称" prop="nickname">
-          <el-input v-model="formData.nickname" placeholder="请输入用户昵称" />
-        </el-form-item>
-
-        <el-form-item label="所属部门" prop="deptId">
+        <el-form-item label="所属组织" prop="orgIds">
           <el-tree-select
-            v-model="formData.deptId"
-            placeholder="请选择所属部门"
-            :data="deptList"
+            multiple
+            v-model="formData.orgIds"
+            placeholder="请选择所属组织"
+            :data="orgList"
             filterable
             check-strictly
             :render-after-expand="false"
@@ -608,7 +604,7 @@ onMounted(() => {
           <dictionary v-model="formData.gender" type-code="gender" />
         </el-form-item>
 
-        <el-form-item label="角色" prop="roleIds">
+        <!-- <el-form-item label="角色" prop="roleIds">
           <el-select v-model="formData.roleIds" multiple placeholder="请选择">
             <el-option
               v-for="item in roleList"
@@ -617,7 +613,7 @@ onMounted(() => {
               :value="item.value"
             />
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
 
         <el-form-item label="手机号码" prop="mobile">
           <el-input
@@ -659,11 +655,11 @@ onMounted(() => {
       @close="closeImportDialog"
     >
       <el-form label-width="80px">
-        <el-form-item label="部门">
+        <el-form-item label="组织">
           <el-tree-select
-            v-model="importDeptId"
-            placeholder="请选择部门"
-            :data="deptList"
+            v-model="importOrgId"
+            placeholder="请选择组织"
+            :data="orgList"
             filterable
             check-strictly
           />

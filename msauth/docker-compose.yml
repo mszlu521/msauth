@@ -20,3 +20,14 @@ services:
       --collation-server=utf8mb4_general_ci
       --explicit_defaults_for_timestamp=true
       --lower_case_table_names=1
+  jira-core:
+    image: jira-core:9.4.0-jdk11-1.0
+    container_name: jira-core
+    hostname: jira-core
+    ports:
+      - "8081:8080"
+    restart: always
+    tty: true
+    volumes:
+      - ./jira/data:/var/atlassian/application-data/jira
+      - ./jira/mysql-connector-j-8.0.31.jar:/opt/atlassian/jira/atlassian-jira/WEB-INF/lib/mysql-connector-j-8.0.31.jar

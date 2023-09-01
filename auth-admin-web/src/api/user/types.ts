@@ -15,7 +15,7 @@ export interface UserInfo {
 export interface UserQuery extends PageQuery {
   keywords?: string;
   status?: number;
-  deptId?: number;
+  orgId?: number;
 }
 
 /**
@@ -31,9 +31,9 @@ export interface UserPageVO {
    */
   createTime?: Date;
   /**
-   * 部门名称
+   * 组织名称
    */
-  deptName?: string;
+  orgNames?: string[];
   /**
    * 用户邮箱
    */
@@ -41,7 +41,7 @@ export interface UserPageVO {
   /**
    * 性别
    */
-  genderLabel?: string;
+  gender?: number;
   /**
    * 用户ID
    */
@@ -53,19 +53,11 @@ export interface UserPageVO {
   /**
    * 用户昵称
    */
-  nickname?: string;
-  /**
-   * 角色名称，多个使用英文逗号(,)分割
-   */
-  roleNames?: string;
+  name?: string;
   /**
    * 用户状态(1:启用;0:禁用)
    */
   status?: number;
-  /**
-   * 用户名
-   */
-  username?: string;
 }
 
 /**
@@ -77,9 +69,9 @@ export interface UserForm {
    */
   avatar?: string;
   /**
-   * 部门ID
+   * 组织ID
    */
-  deptId?: number;
+  orgIds?: number[];
   /**
    * 邮箱
    */
@@ -96,17 +88,10 @@ export interface UserForm {
   /**
    * 昵称
    */
-  nickname?: string;
-  /**
-   * 角色ID集合
-   */
-  roleIds?: number[];
+  name?: string;
+
   /**
    * 用户状态(1:正常;0:禁用)
    */
   status?: number;
-  /**
-   * 用户名
-   */
-  username?: string;
 }

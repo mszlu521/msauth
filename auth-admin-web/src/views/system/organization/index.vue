@@ -1,7 +1,17 @@
 <script setup lang="ts">
-import { listOrganiztion } from "@/api/organization";
+import {
+  listOrganiztion,
+  listOrgOptions,
+  addOrg,
+  getOrgForm,
+  updateOrg,
+} from "@/api/organization";
 
-import { organizationVO, organizationDTO } from "@/api/organization/types";
+import {
+  OrganizationVO,
+  OrganizationDTO,
+  OrganizationForm,
+} from "@/api/organization/types";
 
 defineOptions({
   name: "Organization",
@@ -9,7 +19,7 @@ defineOptions({
 });
 
 const queryFormRef = ref(ElForm);
-const deptFormRef = ref(ElForm);
+const orgFormRef = ref(ElForm);
 
 const loading = ref(false);
 const ids = ref<number[]>([]);
@@ -17,20 +27,21 @@ const dialog = reactive<DialogOption>({
   visible: false,
 });
 
-const queryParams = reactive<organizationDTO>({});
-const orgList = ref<organizationVO[]>();
+const queryParams = reactive<OrganizationDTO>({});
+const orgList = ref<OrganizationVO[]>();
 
-const deptOptions = ref<OptionType[]>();
+const orgOptions = ref<OptionType[]>();
 
-const formData = reactive<organizationDTO>({
+const formData = reactive<OrganizationForm>({
   status: 1,
   parentId: 0,
   sort: 1,
 });
 
 const rules = reactive({
-  parentId: [{ required: true, message: "上级部门不能为空", trigger: "blur" }],
-  name: [{ required: true, message: "部门名称不能为空", trigger: "blur" }],
+  parentId: [{ required: true, message: "上级组织不能为空", trigger: "blur" }],
+  name: [{ required: true, message: "组织名称不能为空", trigger: "blur" }],
+  code: [{ required: true, message: "组织代码不能为空", trigger: "blur" }],
   sort: [{ required: true, message: "显示排序不能为空", trigger: "blur" }],
 });
 
@@ -54,13 +65,13 @@ function handleSelectionChange(selection: any) {
   ids.value = selection.map((item: any) => item.id);
 }
 
-/** 获取部门下拉数据  */
-async function getDeptOptions() {
-  listDeptOptions().then((response) => {
-    deptOptions.value = [
+/** 获取组织下拉数据  */
+async function getOrgOptions() {
+  listOrgOptions().then((response) => {
+    orgOptions.value = [
       {
         value: 0,
-        label: "顶级部门",
+        label: "顶级组织",
         children: response.data,
       },
     ];
@@ -70,31 +81,31 @@ async function getDeptOptions() {
 /**
  * 打开弹窗
  *
- * @param parentId 父部门ID
- * @param deptId 部门ID
+ * @param parentId 父组织ID
+ * @param orgId 组织ID
  */
-async function openDialog(parentId?: number, deptId?: number) {
-  await getDeptOptions();
+async function openDialog(parentId?: number, orgId?: number) {
+  await getOrgOptions();
   dialog.visible = true;
-  if (deptId) {
-    dialog.title = "修改部门";
-    getDeptForm(deptId).then(({ data }) => {
+  if (orgId) {
+    dialog.title = "修改组织";
+    getOrgForm(orgId).then(({ data }) => {
       Object.assign(formData, data);
     });
   } else {
-    dialog.title = "新增部门";
+    dialog.title = "新增组织";
     formData.parentId = parentId ?? 0;
   }
 }
 
 /** 表单提交 */
 function handleSubmit() {
-  deptFormRef.value.validate((valid: any) => {
+  orgFormRef.value.validate((valid: any) => {
     if (valid) {
-      const deptId = formData.id;
+      const orgId = formData.id;
       loading.value = true;
-      if (deptId) {
-        updateDept(deptId, formData)
+      if (orgId) {
+        updateOrg(orgId, formData)
           .then(() => {
             ElMessage.success("修改成功");
             closeDialog();
@@ -102,7 +113,7 @@ function handleSubmit() {
           })
           .finally(() => (loading.value = false));
       } else {
-        addDept(formData)
+        addOrg(formData)
           .then(() => {
             ElMessage.success("新增成功");
             closeDialog();
@@ -114,11 +125,11 @@ function handleSubmit() {
   });
 }
 
-/** 删除部门 */
-function handleDelete(deptId?: number) {
-  const deptIds = [deptId || ids.value].join(",");
+/** 删除组织 */
+function handleDelete(orgId?: number) {
+  const orgIds = [orgId || ids.value].join(",");
 
-  if (!deptIds) {
+  if (!orgIds) {
     ElMessage.warning("请勾选删除项");
     return;
   }
@@ -128,7 +139,7 @@ function handleDelete(deptId?: number) {
     cancelButtonText: "取消",
     type: "warning",
   }).then(() => {
-    deleteDept(deptIds).then(() => {
+    deleteOrg(orgIds).then(() => {
       ElMessage.success("删除成功");
       resetQuery();
     });
@@ -143,8 +154,8 @@ function closeDialog() {
 
 /** 重置表单  */
 function resetForm() {
-  deptFormRef.value.resetFields();
-  deptFormRef.value.clearValidate();
+  orgFormRef.value.resetFields();
+  orgFormRef.value.clearValidate();
 
   formData.id = undefined;
   formData.parentId = 0;
@@ -163,15 +174,15 @@ onMounted(() => {
         <el-form-item label="关键字" prop="keywords">
           <el-input
             v-model="queryParams.keywords"
-            placeholder="部门名称"
+            placeholder="组织名称"
             @keyup.enter="handleQuery"
           />
         </el-form-item>
 
-        <el-form-item label="部门状态" prop="status">
+        <el-form-item label="组织状态" prop="status">
           <el-select
             v-model="queryParams.status"
-            placeholder="部门状态"
+            placeholder="组织状态"
             clearable
           >
             <el-option :value="1" label="正常" />
@@ -191,13 +202,13 @@ onMounted(() => {
     <el-card>
       <template #header>
         <el-button
-          v-hasPerm="['sys:dept:add']"
+          v-hasPerm="['sys:org:add']"
           type="success"
           @click="openDialog(0, undefined)"
           ><i-ep-plus />新增</el-button
         >
         <el-button
-          v-hasPerm="['sys:dept:delete']"
+          v-hasPerm="['sys:org:delete']"
           type="danger"
           :disabled="ids.length === 0"
           @click="handleDelete()"
@@ -214,7 +225,7 @@ onMounted(() => {
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="name" label="部门名称" min-width="200" />
+        <el-table-column prop="name" label="组织名称" min-width="200" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
             <el-tag v-if="scope.row.status == 1" type="success">正常</el-tag>
@@ -227,7 +238,7 @@ onMounted(() => {
         <el-table-column label="操作" fixed="right" align="left" width="200">
           <template #default="scope">
             <el-button
-              v-hasPerm="['sys:dept:add']"
+              v-hasPerm="['sys:org:add']"
               type="primary"
               link
               size="small"
@@ -235,7 +246,7 @@ onMounted(() => {
               ><i-ep-plus />新增
             </el-button>
             <el-button
-              v-hasPerm="['sys:dept:edit']"
+              v-hasPerm="['sys:org:edit']"
               type="primary"
               link
               size="small"
@@ -243,7 +254,7 @@ onMounted(() => {
               ><i-ep-edit />编辑
             </el-button>
             <el-button
-              v-hasPerm="['sys:dept:delete']"
+              v-hasPerm="['sys:org:delete']"
               type="primary"
               link
               size="small"
@@ -263,23 +274,26 @@ onMounted(() => {
       @closed="closeDialog"
     >
       <el-form
-        ref="deptFormRef"
+        ref="orgFormRef"
         :model="formData"
         :rules="rules"
         label-width="80px"
       >
-        <el-form-item label="上级部门" prop="parentId">
+        <el-form-item label="上级组织" prop="parentId">
           <el-tree-select
             v-model="formData.parentId"
-            placeholder="选择上级部门"
-            :data="deptOptions"
+            placeholder="选择上级组织"
+            :data="orgOptions"
             filterable
             check-strictly
             :render-after-expand="false"
           />
         </el-form-item>
-        <el-form-item label="部门名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入部门名称" />
+        <el-form-item label="组织名称" prop="name">
+          <el-input v-model="formData.name" placeholder="请输入组织名称" />
+        </el-form-item>
+        <el-form-item label="组织代码" prop="code">
+          <el-input v-model="formData.code" placeholder="请输入组织代码" />
         </el-form-item>
         <el-form-item label="显示排序" prop="sort">
           <el-input-number
@@ -289,7 +303,7 @@ onMounted(() => {
             :min="0"
           />
         </el-form-item>
-        <el-form-item label="部门状态">
+        <el-form-item label="组织状态">
           <el-radio-group v-model="formData.status">
             <el-radio :label="1">正常</el-radio>
             <el-radio :label="0">禁用</el-radio>
