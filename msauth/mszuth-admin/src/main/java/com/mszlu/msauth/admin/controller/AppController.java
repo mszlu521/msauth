@@ -25,6 +25,7 @@ import com.mszlu.msauth.admin.service.AppService;
 import com.mszlu.msauth.admin.service.UserService;
 import com.mszlu.msauth.response.PageResult;
 import com.mszlu.msauth.response.Result;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,10 +34,10 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/v1/app")
+@RequiredArgsConstructor
 public class AppController {
 
-    @Autowired
-    private AppService appService;
+    private final AppService appService;
 
     @PostMapping("/page")
     public Result<PageResult<AppVO>> page(@RequestBody AppDTO appDTO) {
